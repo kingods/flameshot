@@ -54,6 +54,7 @@ public slots:
     void openInfoWindow();
     void appUpdates();
     void openLauncherWindow();
+    void showClipboardImage();
     void enableTrayIcon();
     void disableTrayIcon();
     void sendTrayNotification(

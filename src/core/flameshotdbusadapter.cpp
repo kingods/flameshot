@@ -59,6 +59,11 @@ void FlameshotDBusAdapter::openLauncher()
     Controller::getInstance()->openLauncherWindow();
 }
 
+void FlameshotDBusAdapter::showClipboardImage()
+{
+     Controller::getInstance()->showClipboardImage();
+}
+
 void FlameshotDBusAdapter::captureScreen(int number,
                                          QString path,
                                          bool toClipboard,

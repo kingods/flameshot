@@ -9,6 +9,7 @@
 
 #include "src/config/configwindow.h"
 #include "src/core/qguiappcurrentscreen.h"
+#include "src/tools/pin/pinwidget.h"
 #include "src/utils/confighandler.h"
 #include "src/utils/history.h"
 #include "src/utils/screengrabber.h"
@@ -382,6 +383,26 @@ void Controller::openLauncherWindow()
     m_launcherWindow->activateWindow();
     m_launcherWindow->raise();
 #endif
+}
+
+void Controller::showClipboardImage()
+{
+    qreal devicePixelRatio = 1;
+    const QPixmap &pixmap = QApplication::clipboard()->pixmap();
+    if (pixmap.height() ==0 || pixmap.width() == 0){
+        return;
+    }
+
+    PinWidget* w = new PinWidget(pixmap);
+    const int m = static_cast<int>(w->margin() * devicePixelRatio);
+    QRect adjusted_pos = QRect(0, 0, 0, 0) + QMargins(m, m, m, m);
+    auto x = (QApplication::desktop()->width() - pixmap.width()) /2;
+    auto y = (QApplication::desktop()->height() - pixmap.height()) / 2;
+
+    w->setGeometry(adjusted_pos);
+    w->setAttribute(Qt::WA_DeleteOnClose);
+    w->move(x, y);
+    w->show();
 }
 
 void Controller::enableTrayIcon()

@@ -32,6 +32,7 @@ public slots:
                                  int delay,
                                  uint id);
     Q_NOREPLY void openLauncher();
+    Q_NOREPLY void showClipboardImage();
     Q_NOREPLY void openConfig();
     Q_NOREPLY void trayIconEnabled(bool enabled);
     Q_NOREPLY void autostartEnabled(bool enabled);

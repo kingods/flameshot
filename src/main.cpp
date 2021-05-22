@@ -137,6 +137,8 @@ int main(int argc, char* argv[])
                                  QObject::tr("Capture the entire desktop."));
     CommandArgument launcherArgument(QStringLiteral("launcher"),
                                      QObject::tr("Open the capture launcher."));
+    CommandArgument pinImageArgument(QStringLiteral("pinImage"),
+                                     QObject::tr("Show the image from the clipboard."));
     CommandArgument guiArgument(
       QStringLiteral("gui"),
       QObject::tr("Start a manual capture in GUI mode."));
@@ -244,6 +246,7 @@ int main(int argc, char* argv[])
     parser.AddArgument(screenArgument);
     parser.AddArgument(fullArgument);
     parser.AddArgument(launcherArgument);
+    parser.AddArgument(pinImageArgument);
     parser.AddArgument(configArgument);
     auto helpOption = parser.addHelpOption();
     auto versionOption = parser.addVersionOption();
@@ -274,6 +277,18 @@ int main(int argc, char* argv[])
     // PROCESS DATA
     //--------------
     if (parser.isSet(helpOption) || parser.isSet(versionOption)) {
+    } else if (parser.isSet(pinImageArgument)) {
+        QDBusMessage m = QDBusMessage::createMethodCall(
+          QStringLiteral("org.flameshot.Flameshot"),
+          QStringLiteral("/"),
+          QLatin1String(""),
+          QStringLiteral("showClipboardImage"));
+        QDBusConnection sessionBus = QDBusConnection::sessionBus();
+        if (!sessionBus.isConnected()) {
+            SystemNotification().sendMessage(
+              QObject::tr("Unable to connect via DBus"));
+        }
+        sessionBus.call(m);
     } else if (parser.isSet(launcherArgument)) { // LAUNCHER
         QDBusMessage m = QDBusMessage::createMethodCall(
           QStringLiteral("org.flameshot.Flameshot"),
