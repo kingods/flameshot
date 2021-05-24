@@ -21,11 +21,12 @@
 #include <QTextStream>
 #include <QTimer>
 #include <QTranslator>
+#include <stdio.h>
 
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
 #include "spdlog/spdlog.h"
 
-#if defined(Q_OS_LINUX) || defined(Q_OS_UNIX)
+#if defined(Q_OS_LINUX) || defined(Q_OS_UNIX) || defined(Q_OS_MACOS)
 #include "src/core/flameshotdbusadapter.h"
 #include "src/utils/dbusutils.h"
 #include <QDBusConnection>
@@ -103,7 +104,7 @@ int main(int argc, char* argv[])
         app.setOrganizationName(QStringLiteral("flameshot"));
 
         auto c = Controller::getInstance();
-#if not(defined(Q_OS_MACOS) || defined(Q_OS_WIN))
+#if not(defined(Q_OS_WIN))
         new FlameshotDBusAdapter(c);
         QDBusConnection dbus = QDBusConnection::sessionBus();
         if (!dbus.isConnected()) {
@@ -119,7 +120,7 @@ int main(int argc, char* argv[])
         return app.exec();
     }
 
-#if not(defined(Q_OS_MACOS) || defined(Q_OS_WIN))
+#if not(defined(Q_OS_WIN))
     /*--------------|
      * CLI parsing  |
      * ------------*/
@@ -137,8 +138,9 @@ int main(int argc, char* argv[])
                                  QObject::tr("Capture the entire desktop."));
     CommandArgument launcherArgument(QStringLiteral("launcher"),
                                      QObject::tr("Open the capture launcher."));
-    CommandArgument pinImageArgument(QStringLiteral("pinImage"),
-                                     QObject::tr("Show the image from the clipboard."));
+    CommandArgument pinImageArgument(
+      QStringLiteral("pinImage"),
+      QObject::tr("Show the image from the clipboard."));
     CommandArgument guiArgument(
       QStringLiteral("gui"),
       QObject::tr("Start a manual capture in GUI mode."));
@@ -271,6 +273,7 @@ int main(int argc, char* argv[])
                       configArgument);
     // Parse
     if (!parser.parse(app.arguments())) {
+        printf("Invalid command line");
         goto finish;
     }
 
@@ -285,6 +288,7 @@ int main(int argc, char* argv[])
           QStringLiteral("showClipboardImage"));
         QDBusConnection sessionBus = QDBusConnection::sessionBus();
         if (!sessionBus.isConnected()) {
+            printf("pinImageArgument dBus is not connected");
             SystemNotification().sendMessage(
               QObject::tr("Unable to connect via DBus"));
         }
