@@ -9,6 +9,10 @@
 class QVBoxLayout;
 class QLabel;
 
+#define PADDING 2
+enum Direction { UP=0, DOWN=1, LEFT, RIGHT, LEFTTOP, LEFTBOTTOM, RIGHTBOTTOM, RIGHTTOP, NONE };
+
+
 class PinWidget : public QWidget
 {
     Q_OBJECT
@@ -17,11 +21,14 @@ public:
 
     int margin() const;
 
+    void region(const QPoint &currentGlobalPoint);
+
 protected:
     void wheelEvent(QWheelEvent* e);
     void mouseDoubleClickEvent(QMouseEvent*);
     void mousePressEvent(QMouseEvent*);
     void mouseMoveEvent(QMouseEvent*);
+    void mouseReleaseEvent(QMouseEvent *event);
     void enterEvent(QEvent*);
     void leaveEvent(QEvent*);
 
@@ -35,4 +42,8 @@ private:
     qreal m_offsetX, m_offsetY;
     QGraphicsDropShadowEffect* m_shadowEffect;
     QColor m_baseColor, m_hoverColor;
+
+    QPoint m_movePoint;  //鼠标的位置
+    bool isLeftPressDown;  // 判断左键是否按下
+    Direction dir; 
 };
