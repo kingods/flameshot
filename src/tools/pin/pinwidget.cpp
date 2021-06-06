@@ -185,7 +185,7 @@ void PinWidget::mousePressEvent(QMouseEvent *event)
             this->setWindowState(Qt::WindowMinimized);
             break;
         default:
-            this->mousePressEvent(event);
+            QWidget::mousePressEvent(event);
     }
 }
 
@@ -211,11 +211,9 @@ void PinWidget::mouseMoveEvent(QMouseEvent *event)
             if(dir != NONE)
             {
                 QRect newRect(topLeft, bottomRight); //定义一个矩形  拖动后最大1000*1618
-
                 switch(dir)
                 {
                     case LEFT:
-
                         if(bottomRight.x() - globalPoint.x() <= this->minimumWidth())
                         {
                             newRect.setLeft(topLeft.x());  //小于界面的最小宽度时，设置为左上角横坐标为窗口x
@@ -304,6 +302,13 @@ void PinWidget::mouseMoveEvent(QMouseEvent *event)
                       default:
                           break;
                 }
+
+                QSize size(newRect.width(), newRect.height());
+                setScaledPixmap(size);
+                adjustSize();
+                event->accept();
+                newRect.setWidth(m_label->pixmap()->width());
+                newRect.setHeight(m_label->pixmap()->height());
                 this->setGeometry(newRect);
             }
             else
@@ -326,6 +331,7 @@ void PinWidget::mouseReleaseEvent(QMouseEvent *event)
         {
             this->releaseMouse(); //释放鼠标抓取
             this->setCursor(QCursor(Qt::ArrowCursor));
+            dir = NONE;
         }
     }
 }
