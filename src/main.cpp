@@ -24,6 +24,8 @@
 #include <QSharedMemory>
 #include <QTimer>
 #include <QTranslator>
+#include <QClipboard>
+#include <QScreen>
 #if defined(Q_OS_LINUX) || defined(Q_OS_UNIX)
 #include "abstractlogger.h"
 #include "src/core/flameshotdbusadapter.h"
@@ -44,6 +46,27 @@ void wayland_hacks()
     }
 }
 #endif
+
+int pinImageFromClipboard()
+{
+   Flameshot* flameshot = Flameshot::instance();
+   const QPixmap &pixmap = QApplication::clipboard()->pixmap();
+   if (pixmap.height() ==0 || pixmap.width() == 0){
+       return 1;
+   }
+
+   QScreen *screen = QGuiApplication::primaryScreen();
+   QRect  screenGeometry = screen->geometry();
+   const int &height = screenGeometry.height();
+   const int &width = screenGeometry.width();
+   const QPoint pos = QPoint((width - pixmap.width())/2, (height - pixmap.height())/2);
+
+   CaptureRequest req(CaptureRequest::GRAPHICAL_MODE);
+   req.addTask(CaptureRequest::PIN);
+   QRect rect = QRect(pos.x(), pos.y(), pixmap.width(), pixmap.height());
+   flameshot->exportCapture(pixmap, rect, req);
+   return 0;
+}
 
 void requestCaptureAndWait(const CaptureRequest& req)
 {
@@ -186,6 +209,10 @@ int main(int argc, char* argv[])
     CommandArgument screenArgument(
       QStringLiteral("screen"),
       QObject::tr("Capture a screenshot of the specified monitor."));
+    // CommandArgument screenArgument(QStringLiteral("screen"),
+    //                                QObject::tr("Capture a single screen."));
+    CommandArgument pinArgument(QStringLiteral("pin"),
+                                   QObject::tr("pin the screenshot from the clipboard"));
 
     // Options
     CommandOption pathOption(
@@ -315,6 +342,7 @@ int main(int argc, char* argv[])
     parser.AddArgument(fullArgument);
     parser.AddArgument(launcherArgument);
     parser.AddArgument(configArgument);
+    parser.AddArgument(pinArgument);
     auto helpOption = parser.addHelpOption();
     auto versionOption = parser.addVersionOption();
     parser.AddOptions({ pathOption,
@@ -573,6 +601,11 @@ int main(int argc, char* argv[])
                 config.setContrastUiColor(parsedColor);
             }
         }
+    } else if (parser.isSet(pinArgument)) {
+        delete qApp;
+        new QApplication(argc, argv);
+        const int ret = pinImageFromClipboard();
+        qApp->exit(ret);
     }
 finish:
 
